@@ -9,7 +9,6 @@
           name="status"
           v-model="checkStatus"
           :value="option.value"
-          @change="displaySwitching"
         />{{ option.label }}
       </label>
     </template>
@@ -23,7 +22,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(toDo, index) in toDos" :key="index">
+        <tr v-for="(toDo, index) in filterToDos" :key="index">
           <td>{{ toDo.id }}</td>
           <td>{{ toDo.task }}</td>
           <td>
@@ -48,10 +47,7 @@ export default {
     return {
       checkStatus: "all",
       newTask: "",
-      /* タスクリスト表示用の配列 */
       toDos: [],
-      /* タスクリストのマスターデータ用配列 */
-      masterToDos: [],
       options: [
         {
           label: "全て",
@@ -68,20 +64,15 @@ export default {
       ],
     };
   },
-  methods: {
-    displaySwitching() {
-      if (this.checkStatus === "all") {
-        this.toDos = this.masterToDos;
-      } else if (this.checkStatus === "inWork") {
-        this.toDos = this.masterToDos.filter((value) => {
-          return value.status === "作業中";
-        });
-      } else {
-        this.toDos = this.masterToDos.filter((value) => {
-          return value.status === "完了";
-        });
-      }
+  computed: {
+    filterToDos() {
+      if (this.checkStatus === "all") return this.toDos;
+      if (this.checkStatus === "inWork")
+        return this.toDos.filter((value) => value.status === "作業中");
+      return this.toDos.filter((value) => value.status === "完了");
     },
+  },
+  methods: {
     addNewTask() {
       const toDo = {
         id: this.toDos.length,
@@ -89,30 +80,21 @@ export default {
         status: "作業中",
       };
       this.toDos.push(toDo);
-      this.masterToDos = this.toDos;
       this.newTask = "";
-      this.displaySwitching();
     },
     changeStatus(status, id) {
       if (status === "作業中") {
-        this.masterToDos[id].status = "完了";
-        this.assignToDosToMasterToDos();
+        this.toDos[id].status = "完了";
       } else {
-        this.masterToDos[id].status = "作業中";
-        this.assignToDosToMasterToDos();
+        this.toDos[id].status = "作業中";
       }
     },
     deleteTask(id) {
-      this.masterToDos.splice(id, 1);
-      /* 以下の記述は、タスク削除後にIDを0から振り直すためのコードです */
-      this.masterToDos.forEach((currentValue, index) => {
+      this.toDos.splice(id, 1);
+      /* 以下の記述は、タスク削除後にIDを0から振り直すためのコード */
+      this.toDos.forEach((currentValue, index) => {
         currentValue.id = index;
       });
-      this.assignToDosToMasterToDos();
-    },
-    assignToDosToMasterToDos() {
-      this.toDos = this.masterToDos;
-      this.displaySwitching();
     },
   },
 };
