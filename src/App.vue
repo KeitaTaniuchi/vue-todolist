@@ -105,9 +105,9 @@ export default {
     deleteTask(id) {
       this.masterToDos.splice(id, 1);
       /* 以下の記述は、タスク削除後にIDを0から振り直すためのコードです */
-      for (let i = 0; i < this.masterToDos.length; i++) {
-        this.masterToDos[i].id = i;
-      }
+      this.masterToDos.forEach((currentValue, index) => {
+        currentValue.id = index;
+      });
       this.assignToDosToMasterToDos();
     },
     assignToDosToMasterToDos() {
